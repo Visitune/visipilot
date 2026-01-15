@@ -22,7 +22,7 @@ const INITIAL_DELIVERY_LOGS: DeliveryLog[] = [
 
 const INITIAL_CLEANING_TASKS: CleaningTask[] = [
   { id: '1', area: 'Cuisine', taskName: 'Désinfection Plans de travail', frequency: 'Daily', isDone: false },
-  { id: '2', area: 'Cuisine', taskName: 'Nettoyage Sols', frequency: 'Daily', isDone: true, doneAt: new Date(), user: 'Chef', proofPhoto: 'mock' },
+  { id: '2', area: 'Cuisine', taskName: 'Nettoyage Sols', frequency: 'Daily', isDone: true, doneAt: new Date(), user: 'Chef' },
   { id: '3', area: 'Plonge', taskName: 'Vidange Lave-Vaisselle', frequency: 'Daily', isDone: false },
   { id: '4', area: 'Stockage', taskName: 'Nettoyage Étagères', frequency: 'Weekly', isDone: false },
 ];

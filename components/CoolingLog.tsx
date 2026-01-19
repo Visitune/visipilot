@@ -175,7 +175,7 @@ const CoolingLogComponent: React.FC<CoolingLogProps> = ({ logs, onAddLog, onEdit
                   onChange={e => setStartTemp(Number(e.target.value))}
                   className="w-full h-4 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-orange-500"
                 />
-                <div className="text-xs text-orange-800 mt-1 text-right">Doit être > 63°C</div>
+                <div className="text-xs text-orange-800 mt-1 text-right">Doit être &gt; 63°C</div>
               </div>
 
               {/* End Temp Slider */}

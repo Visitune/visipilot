@@ -14,20 +14,32 @@ const UserGuide: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-6">
 
-        {/* Module Sauvegarde (Package) - NOUVEAU */}
+        {/* Module Sauvegarde (Package) - CORRIGÉ */}
         <div className="bg-emerald-50 p-6 rounded-xl shadow-sm border border-emerald-100">
             <div className="flex items-center mb-4">
                 <div className="p-2 bg-emerald-200 text-emerald-800 rounded-lg mr-3">
                     <Download className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">Sauvegarde & "Package" (Important)</h3>
+                <h3 className="text-lg font-bold text-gray-900">Sauvegarde & "Package"</h3>
             </div>
              <ul className="list-disc ml-5 space-y-3 text-gray-700 text-sm">
-                <li><strong>Qu'est-ce qu'un Package ?</strong> C'est un fichier unique (<code>.json</code>) qui contient <strong>l'intégralité</strong> de vos données : l'historique des relevés, vos paramètres, mais aussi toutes vos <strong>photos et documents PDF</strong> du classeur numérique.</li>
-                <li><strong>Comment sauvegarder ?</strong> Allez dans l'onglet <em>Paramètres</em>, section "Package", et cliquez sur <strong>"Télécharger le Package"</strong>. Conservez ce fichier précieusement (Cloud, Clé USB, Disque Dur).</li>
-                <li><strong>Inclusion des Photos/Docs :</strong> Pas besoin de sauvegarder les images séparément. Elles sont encodées à l'intérieur du fichier Package.</li>
-                <li><strong>Alerte Mémoire :</strong> Le navigateur de votre tablette a une mémoire limitée. Si l'application vous signale "Mémoire Pleine", exportez un Package immédiatement pour sécuriser vos données, puis réinitialisez l'application pour faire de la place.</li>
-                <li><strong>Restauration :</strong> Pour changer de tablette ou récupérer vos données, il suffit d'utiliser le bouton <strong>"Charger un Package"</strong> dans les paramètres.</li>
+                <li><strong>Qu'est-ce qu'un Package ?</strong> C'est un fichier de sauvegarde unique (format <code>.json</code>) qui contient <strong>l'intégralité</strong> de vos données :
+                    <ul className="list-disc ml-5 mt-1 text-gray-600">
+                        <li>L'historique complet des relevés (Température, Nettoyage, etc.)</li>
+                        <li>La configuration (Equipements, Tâches, Nom d'entreprise)</li>
+                        <li><strong>Toutes les Photos et Documents PDF</strong> (Classeur numérique, Etiquettes, BL).</li>
+                    </ul>
+                </li>
+                <li><strong>Inclusion des Photos/Docs :</strong> Vous n'avez pas besoin de sauvegarder les images séparément. Elles sont encodées à l'intérieur du fichier Package. C'est pourquoi le fichier peut devenir volumineux (plusieurs Mo).</li>
+                <li><strong>Gestion de la Mémoire :</strong> VISI-JN stocke les données dans la mémoire de votre tablette. Cette mémoire est limitée (env. 5-10 Mo par le navigateur). Les photos remplissent vite cette mémoire.</li>
+                <li><strong>Procédure de Sécurité :</strong>
+                    <ol className="list-decimal ml-5 mt-1">
+                        <li>Si une alerte "Mémoire Pleine" apparaît, allez dans <strong>Paramètres</strong>.</li>
+                        <li>Cliquez sur <strong>"Télécharger le Package"</strong> pour sauvegarder tout sur votre appareil (clé USB, disque dur).</li>
+                        <li>Une fois le fichier en sécurité, utilisez le bouton rouge "Réinitialiser" pour vider l'application et repartir à zéro.</li>
+                    </ol>
+                </li>
+                <li><strong>Restauration :</strong> Pour consulter d'anciennes données, utilisez simplement le bouton <strong>"Charger un Package"</strong>.</li>
             </ul>
         </div>
 
@@ -71,7 +83,7 @@ const UserGuide: React.FC = () => {
           </div>
           <ul className="list-disc ml-5 space-y-2 text-gray-600 text-sm">
             <li>Effectuez vos relevés <strong>2 fois par jour</strong> (matin et soir).</li>
-            <li>Si une température est hors norme (> 4°C pour frigo), une alerte est créée.</li>
+            <li>Si une température est hors norme (&gt; 4°C pour frigo), une alerte est créée.</li>
             <li>En cas d'alerte, ajoutez une action corrective (ex: "Porte mal fermée", "Maintenance appelée").</li>
           </ul>
         </div>
@@ -87,7 +99,7 @@ const UserGuide: React.FC = () => {
           <ul className="list-disc ml-5 space-y-2 text-gray-600 text-sm">
             <li>Contrôlez la température à cœur des produits sensibles (viande, poisson).</li>
             <li><strong>Obligatoire :</strong> Prenez en photo le BL ou l'état du camion en cas de doute.</li>
-            <li>Refusez la marchandise si T° > 4°C (frais) ou -15°C (surgelé).</li>
+            <li>Refusez la marchandise si T° &gt; 4°C (frais) ou -15°C (surgelé).</li>
             <li>Le numéro de lot est crucial pour la traçabilité ascendante.</li>
           </ul>
         </div>

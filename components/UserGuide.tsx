@@ -1,152 +1,240 @@
 import React from 'react';
-import { BookOpen, Thermometer, Truck, ClipboardCheck, Tag, Snowflake, Edit, Bot, Download } from './Icons';
+import { BookOpen, Thermometer, Truck, ClipboardCheck, Tag, Snowflake, Bot, Download, AlertTriangle, Trash, Folder } from './Icons';
 
 const UserGuide: React.FC = () => {
   return (
-    <div className="space-y-8 pb-20 md:pb-0 animate-in fade-in slide-in-from-bottom-4">
-      <div className="flex items-center space-x-3 mb-2">
-        <BookOpen className="w-8 h-8 text-indigo-600" />
-        <h2 className="text-2xl font-bold text-gray-800">Guide Utilisateur</h2>
+    <div className="space-y-8 pb-32 md:pb-10 animate-in fade-in slide-in-from-bottom-4">
+      
+      {/* Hero Header */}
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -mr-16 -mt-16"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -ml-16 -mb-16"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+                <div className="p-4 bg-white/10 backdrop-blur-sm rounded-2xl shadow-inner border border-white/20">
+                    <BookOpen className="w-10 h-10 text-indigo-300" />
+                </div>
+                <div>
+                    <h1 className="text-3xl font-extrabold tracking-tight">Guide Utilisateur</h1>
+                    <p className="text-slate-300 text-lg font-medium mt-1">Maîtrisez votre conformité HACCP</p>
+                </div>
+            </div>
+            <div className="text-sm font-medium bg-white/10 px-4 py-2 rounded-lg border border-white/10">
+                Version 2.4 • Mode Hors-Ligne
+            </div>
+        </div>
       </div>
-      <p className="text-gray-600">
-        Bienvenue dans VISI-JN. Ce guide vous explique comment utiliser chaque module pour garantir votre conformité HACCP.
-      </p>
 
-      <div className="grid grid-cols-1 gap-6">
-
-        {/* Module Sauvegarde (Package) - CORRIGÉ */}
-        <div className="bg-emerald-50 p-6 rounded-xl shadow-sm border border-emerald-100">
-            <div className="flex items-center mb-4">
-                <div className="p-2 bg-emerald-200 text-emerald-800 rounded-lg mr-3">
-                    <Download className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">Sauvegarde & "Package"</h3>
-            </div>
-             <ul className="list-disc ml-5 space-y-3 text-gray-700 text-sm">
-                <li><strong>Qu'est-ce qu'un Package ?</strong> C'est un fichier de sauvegarde unique (format <code>.json</code>) qui contient <strong>l'intégralité</strong> de vos données :
-                    <ul className="list-disc ml-5 mt-1 text-gray-600">
-                        <li>L'historique complet des relevés (Température, Nettoyage, etc.)</li>
-                        <li>La configuration (Equipements, Tâches, Nom d'entreprise)</li>
-                        <li><strong>Toutes les Photos et Documents PDF</strong> (Classeur numérique, Etiquettes, BL).</li>
-                    </ul>
-                </li>
-                <li><strong>Inclusion des Photos/Docs :</strong> Vous n'avez pas besoin de sauvegarder les images séparément. Elles sont encodées à l'intérieur du fichier Package. C'est pourquoi le fichier peut devenir volumineux (plusieurs Mo).</li>
-                <li><strong>Gestion de la Mémoire :</strong> VISI-JN stocke les données dans la mémoire de votre tablette. Cette mémoire est limitée (env. 5-10 Mo par le navigateur). Les photos remplissent vite cette mémoire.</li>
-                <li><strong>Procédure de Sécurité :</strong>
-                    <ol className="list-decimal ml-5 mt-1">
-                        <li>Si une alerte "Mémoire Pleine" apparaît, allez dans <strong>Paramètres</strong>.</li>
-                        <li>Cliquez sur <strong>"Télécharger le Package"</strong> pour sauvegarder tout sur votre appareil (clé USB, disque dur).</li>
-                        <li>Une fois le fichier en sécurité, utilisez le bouton rouge "Réinitialiser" pour vider l'application et repartir à zéro.</li>
-                    </ol>
-                </li>
-                <li><strong>Restauration :</strong> Pour consulter d'anciennes données, utilisez simplement le bouton <strong>"Charger un Package"</strong>.</li>
-            </ul>
-        </div>
-
-        {/* Modification des données */}
-        <div className="bg-indigo-50 p-6 rounded-xl shadow-sm border border-indigo-100">
-            <div className="flex items-center mb-4">
-                <div className="p-2 bg-indigo-200 text-indigo-700 rounded-lg mr-3">
-                    <Edit className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-800">Modification des Données</h3>
-            </div>
-             <ul className="list-disc ml-5 space-y-2 text-gray-700 text-sm">
-                <li>Vous pouvez modifier un enregistrement (T°, Livraison, Refroidissement) en cliquant sur l'icône <strong>Crayon</strong> à droite de la ligne.</li>
-                <li><strong>Règle de sécurité :</strong> La modification n'est possible que pour les enregistrements effectués <strong>le jour même</strong>.</li>
-                <li>Une fois la journée terminée (date passée), les enregistrements deviennent définitifs et inaltérables pour garantir l'intégrité de la traçabilité.</li>
-            </ul>
-        </div>
-
-        {/* Assistant IA */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center mb-4">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-lg mr-3">
-                    <Bot className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-800">Configuration IA</h3>
-            </div>
-             <ul className="list-disc ml-5 space-y-2 text-gray-600 text-sm">
-                <li>Pour activer l'Assistant Expert, rendez-vous dans l'onglet <strong>Paramètres</strong>.</li>
-                <li>Saisissez votre <strong>Clé API Google Gemini</strong> (gratuite).</li>
-                <li>L'assistant peut alors répondre à vos questions techniques (réglementation, DLC, allergènes) 24h/24.</li>
-            </ul>
+      {/* CORE FEATURE: LE PACKAGE */}
+      <section className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+        <div className="bg-emerald-50/50 p-8 border-b border-emerald-100">
+           <div className="flex items-center gap-4 mb-4">
+               <div className="p-3 bg-emerald-500 rounded-xl text-white shadow-lg shadow-emerald-200">
+                   <Download className="w-8 h-8" />
+               </div>
+               <div>
+                   <h3 className="text-2xl font-bold text-slate-800">Le système de "Package"</h3>
+                   <p className="text-emerald-700 font-medium">Comprendre la sauvegarde et la gestion mémoire</p>
+               </div>
+           </div>
+           <p className="text-slate-600 max-w-3xl leading-relaxed">
+               VISI-JN est une application <strong>sécurisée et autonome</strong> : vos données (photos, relevés) sont stockées directement dans votre tablette. 
+               Pour garantir la pérennité de vos données, nous utilisons des "Packages" (archives compressées).
+           </p>
         </div>
         
-        {/* Module Relevés T° */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center mb-4">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg mr-3">
-              <Thermometer className="w-6 h-6" />
+        <div className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Etape 1 */}
+                <div className="group relative p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300">
+                    <div className="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black text-lg shadow-lg rotate-3 group-hover:rotate-0 transition-transform">1</div>
+                    <div className="flex flex-col items-center text-center mb-6 mt-2">
+                        <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4 text-indigo-600 group-hover:scale-110 transition-transform">
+                            <Download className="w-8 h-8" />
+                        </div>
+                        <h4 className="font-bold text-lg text-slate-800">Exporter le Package</h4>
+                    </div>
+                    <p className="text-sm text-slate-600 leading-relaxed text-center">
+                        Dans l'onglet <strong>Paramètres</strong>, cliquez sur "Télécharger le Package". 
+                        L'app génère un fichier unique contenant <strong>tout votre historique</strong> et <strong>toutes vos photos</strong>.
+                    </p>
+                </div>
+
+                {/* Etape 2 */}
+                <div className="group relative p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:border-emerald-200 hover:shadow-lg transition-all duration-300">
+                    <div className="absolute -top-4 -left-4 w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center font-black text-lg shadow-lg -rotate-3 group-hover:rotate-0 transition-transform">2</div>
+                    <div className="flex flex-col items-center text-center mb-6 mt-2">
+                         <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4 text-emerald-600 group-hover:scale-110 transition-transform">
+                            <Folder className="w-8 h-8" />
+                        </div>
+                        <h4 className="font-bold text-lg text-slate-800">Archiver en sécurité</h4>
+                    </div>
+                    <p className="text-sm text-slate-600 leading-relaxed text-center">
+                        Une fois téléchargé, ce fichier est votre <strong>archive légale</strong>. 
+                        Stockez-le sur une clé USB, un disque dur externe ou envoyez-le par email à la direction.
+                    </p>
+                </div>
+
+                {/* Etape 3 */}
+                <div className="group relative p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:border-orange-200 hover:shadow-lg transition-all duration-300">
+                     <div className="absolute -top-4 -left-4 w-10 h-10 bg-orange-500 text-white rounded-xl flex items-center justify-center font-black text-lg shadow-lg rotate-3 group-hover:rotate-0 transition-transform">3</div>
+                    <div className="flex flex-col items-center text-center mb-6 mt-2">
+                         <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4 text-orange-600 group-hover:scale-110 transition-transform">
+                            <Trash className="w-8 h-8" />
+                        </div>
+                        <h4 className="font-bold text-lg text-slate-800">Faire place nette</h4>
+                    </div>
+                    <p className="text-sm text-slate-600 leading-relaxed text-center">
+                        Si la tablette est pleine (alerte mémoire), et <strong>seulement après avoir sécurisé le package</strong>, 
+                        utilisez le bouton "Réinitialiser" pour vider l'application.
+                    </p>
+                </div>
             </div>
-            <h3 className="text-lg font-bold text-gray-800">Relevés de Température</h3>
-          </div>
-          <ul className="list-disc ml-5 space-y-2 text-gray-600 text-sm">
-            <li>Effectuez vos relevés <strong>2 fois par jour</strong> (matin et soir).</li>
-            <li>Si une température est hors norme (&gt; 4°C pour frigo), une alerte est créée.</li>
-            <li>En cas d'alerte, ajoutez une action corrective (ex: "Porte mal fermée", "Maintenance appelée").</li>
-          </ul>
+
+            <div className="mt-8 bg-indigo-50 rounded-xl p-5 border border-indigo-100 flex items-start gap-4">
+                <AlertTriangle className="w-6 h-6 text-indigo-600 shrink-0 mt-1" />
+                <div>
+                    <h5 className="font-bold text-indigo-900">Fréquence recommandée</h5>
+                    <p className="text-sm text-indigo-700 mt-1">
+                        Nous recommandons de créer un Package <strong>à la fin de chaque mois</strong> ou dès que vous recevez une alerte de stockage. 
+                        C'est la garantie de ne jamais perdre vos relevés en cas de panne de tablette.
+                    </p>
+                </div>
+            </div>
+        </div>
+      </section>
+
+      {/* MODULES GRID */}
+      <h3 className="text-xl font-bold text-slate-800 pl-2 border-l-4 border-indigo-500">Modules Opérationnels</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {/* Relevés T° */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                    <Thermometer className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-slate-800">Relevés de Température</h4>
+            </div>
+            <ul className="space-y-2 text-sm text-slate-600">
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 shrink-0"></span>
+                    <span>2 relevés par jour (Matin/Soir) recommandés.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Zone verte : 0°C à 4°C. Zone rouge : {'>'} 8°C.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Actions correctives obligatoires en cas d'alerte.</span>
+                </li>
+            </ul>
         </div>
 
-        {/* Module Réception */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center mb-4">
-            <div className="p-2 bg-green-100 text-green-600 rounded-lg mr-3">
-              <Truck className="w-6 h-6" />
+        {/* Réception */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-green-100 text-green-600 rounded-lg">
+                    <Truck className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-slate-800">Réception Marchandises</h4>
             </div>
-            <h3 className="text-lg font-bold text-gray-800">Réception Marchandises</h3>
-          </div>
-          <ul className="list-disc ml-5 space-y-2 text-gray-600 text-sm">
-            <li>Contrôlez la température à cœur des produits sensibles (viande, poisson).</li>
-            <li><strong>Obligatoire :</strong> Prenez en photo le BL ou l'état du camion en cas de doute.</li>
-            <li>Refusez la marchandise si T° &gt; 4°C (frais) ou -15°C (surgelé).</li>
-            <li>Le numéro de lot est crucial pour la traçabilité ascendante.</li>
-          </ul>
+            <ul className="space-y-2 text-sm text-slate-600">
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Photo du BL ou du camion obligatoire si anomalie.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Saisissez le N° de Lot pour la traçabilité.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Refusez si T° {'>'} 4°C (frais) ou -15°C (surgelé).</span>
+                </li>
+            </ul>
         </div>
 
-        {/* Module Refroidissement */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center mb-4">
-            <div className="p-2 bg-cyan-100 text-cyan-600 rounded-lg mr-3">
-              <Snowflake className="w-6 h-6" />
+        {/* Refroidissement */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-cyan-100 text-cyan-600 rounded-lg">
+                    <Snowflake className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-slate-800">Cellule de Refroidissement</h4>
             </div>
-            <h3 className="text-lg font-bold text-gray-800">Cellule de Refroidissement</h3>
-          </div>
-          <ul className="list-disc ml-5 space-y-2 text-gray-600 text-sm">
-            <li>La règle d'or : passer de <strong>+63°C à +10°C en moins de 2 heures</strong>.</li>
-            <li>Enregistrez la température de début (sortie four) et de fin (sortie cellule).</li>
-            <li>Si le temps dépasse 2h, le lot doit être jeté ou consommé immédiatement (selon procédure interne).</li>
-          </ul>
+            <ul className="space-y-2 text-sm text-slate-600">
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Objectif : +63°C à +10°C en {'<'} 2 heures.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Chronomètre automatique de la durée.</span>
+                </li>
+            </ul>
         </div>
 
-        {/* Module Étiquettes */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center mb-4">
-            <div className="p-2 bg-purple-100 text-purple-600 rounded-lg mr-3">
-              <Tag className="w-6 h-6" />
+        {/* Étiquettes */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
+                    <Tag className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-slate-800">Étiquettes DLC</h4>
             </div>
-            <h3 className="text-lg font-bold text-gray-800">Étiquettes & Traçabilité</h3>
-          </div>
-          <ul className="list-disc ml-5 space-y-2 text-gray-600 text-sm">
-            <li>Pour chaque préparation entamée ou transformée, créez une étiquette.</li>
-            <li>Utilisez le bouton <strong>Photo</strong> pour capturer l'étiquette d'origine du fournisseur (numéro de lot, origine).</li>
-            <li>La DLC est calculée automatiquement selon vos paramètres (J+3 par défaut).</li>
-          </ul>
+            <ul className="space-y-2 text-sm text-slate-600">
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Calcul automatique de la DLC (J+3 par défaut).</span>
+                </li>
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Prenez en photo l'étiquette d'origine fournisseur.</span>
+                </li>
+            </ul>
         </div>
 
-        {/* Module Nettoyage */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center mb-4">
-            <div className="p-2 bg-orange-100 text-orange-600 rounded-lg mr-3">
-              <ClipboardCheck className="w-6 h-6" />
+        {/* Nettoyage */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
+                    <ClipboardCheck className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-slate-800">Plan de Nettoyage</h4>
             </div>
-            <h3 className="text-lg font-bold text-gray-800">Plan de Nettoyage</h3>
-          </div>
-          <ul className="list-disc ml-5 space-y-2 text-gray-600 text-sm">
-            <li>Suivez le plan quotidien.</li>
-            <li>Pour valider une tâche critique, prenez une <strong>photo de preuve</strong> (ex: sol propre, lave-vaisselle vide).</li>
-            <li>L'avancement se remet à zéro chaque jour à minuit (simulation).</li>
-          </ul>
+            <ul className="space-y-2 text-sm text-slate-600">
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Liste des tâches quotidiennes et hebdo.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Possibilité d'ajouter une "Preuve Photo".</span>
+                </li>
+            </ul>
+        </div>
+
+         {/* IA & Modifs */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-slate-100 text-slate-600 rounded-lg">
+                    <Bot className="w-6 h-6" />
+                </div>
+                <h4 className="font-bold text-slate-800">Assistant & Modifications</h4>
+            </div>
+            <ul className="space-y-2 text-sm text-slate-600">
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Modifications possibles uniquement le jour J (crayon).</span>
+                </li>
+                <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full mt-2 shrink-0"></span>
+                    <span>Assistant IA disponible pour questions réglementaires.</span>
+                </li>
+            </ul>
         </div>
 
       </div>

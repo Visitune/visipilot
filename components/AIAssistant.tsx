@@ -1,10 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage } from '../types';
 import { createHACCPChat, sendMessageToGemini } from '../services/geminiService';
-import { Send, Bot, User as UserIcon } from './Icons';
+import { Send, Bot, AlertTriangle } from './Icons';
 import { GenerateContentResponse } from '@google/genai';
 
-const AIAssistant: React.FC = () => {
+interface AIAssistantProps {
+  apiKey?: string;
+}
+
+const AIAssistant: React.FC<AIAssistantProps> = ({ apiKey }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome',
@@ -15,7 +19,10 @@ const AIAssistant: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const chatSession = useRef(createHACCPChat());
+  // We can't use useRef for the chat session easily if the key changes, so we'll recreate it if needed in handleSend or via effect.
+  // Actually, keeping it simple: recreate session on mount or key change isn't ideal for persistent chat, 
+  // but for this scope, let's just instantiate when sending if possible or use a ref that updates.
+  const chatSession = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -26,9 +33,24 @@ const AIAssistant: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Reset chat if key changes
+  useEffect(() => {
+    chatSession.current = null;
+  }, [apiKey]);
+
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!input.trim() || isLoading) return;
+    
+    if (!apiKey) {
+         setMessages(prev => [...prev, {
+            id: Date.now().toString(),
+            role: 'model',
+            text: "Erreur : Aucune clé API configurée. Veuillez ajouter votre clé Gemini dans l'onglet Paramètres.",
+            timestamp: new Date()
+          }]);
+        return;
+    }
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
@@ -42,6 +64,10 @@ const AIAssistant: React.FC = () => {
     setIsLoading(true);
 
     try {
+      if (!chatSession.current) {
+          chatSession.current = createHACCPChat(apiKey);
+      }
+      
       const result = await sendMessageToGemini(chatSession.current, userMsg.text);
       
       let fullResponseText = '';
@@ -56,7 +82,8 @@ const AIAssistant: React.FC = () => {
       }]);
 
       for await (const chunk of result) {
-        const text = chunk.text();
+        const c = chunk as GenerateContentResponse;
+        const text = c.text;
         if (text) {
           fullResponseText += text;
           setMessages(prev => prev.map(msg => 
@@ -65,16 +92,31 @@ const AIAssistant: React.FC = () => {
         }
       }
     } catch (error) {
+      console.error(error);
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
         role: 'model',
-        text: "Désolé, je rencontre des difficultés pour accéder au service. Veuillez vérifier votre clé API.",
+        text: "Désolé, une erreur est survenue. Vérifiez votre clé API dans les paramètres.",
         timestamp: new Date()
       }]);
+      chatSession.current = null; // Reset session on error
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (!apiKey) {
+      return (
+          <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-white rounded-xl">
+              <AlertTriangle className="w-12 h-12 text-orange-500 mb-4" />
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Configuration Requise</h3>
+              <p className="text-gray-600 mb-4">
+                  Pour discuter avec l'expert HACCP, vous devez configurer votre clé API Google Gemini.
+              </p>
+              <p className="text-sm text-gray-500">Allez dans le menu <strong>Paramètres</strong> pour l'ajouter.</p>
+          </div>
+      )
+  }
 
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -126,8 +168,9 @@ const AIAssistant: React.FC = () => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Posez une question sur l'hygiène (ex: température cuisson poulet)"
-            className="flex-1 p-3 pr-12 bg-gray-100 border-transparent rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+            placeholder="Posez une question sur l'hygiène..."
+            style={{ colorScheme: 'light' }}
+            className="flex-1 p-3 pr-12 bg-white border border-gray-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900 shadow-sm placeholder-gray-400"
             disabled={isLoading}
           />
           <button 

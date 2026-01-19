@@ -1,16 +1,18 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { TempLog, DeliveryLog, CleaningTask, CoolingLog } from '../types';
+import { TempLog, DeliveryLog, CleaningTask, CoolingLog, LabelLog } from '../types';
 import { CheckCircle, AlertTriangle, Thermometer, FileText, Download, Truck, ClipboardCheck } from './Icons';
+import { generateDailyReport } from '../utils/pdfGenerator';
 
 interface DashboardProps {
   tempLogs: TempLog[];
   deliveryLogs: DeliveryLog[];
   cleaningTasks: CleaningTask[];
   coolingLogs: CoolingLog[];
+  labelHistory?: LabelLog[];
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ tempLogs, deliveryLogs, cleaningTasks, coolingLogs }) => {
+const Dashboard: React.FC<DashboardProps> = ({ tempLogs, deliveryLogs, cleaningTasks, coolingLogs, labelHistory = [] }) => {
   // --- CALCULATE REAL STATS ---
   
   // 1. Compliance Rate Calculation
@@ -39,41 +41,28 @@ const Dashboard: React.FC<DashboardProps> = ({ tempLogs, deliveryLogs, cleaningT
   ];
 
   const handleExport = () => {
-    // Generate a simple text report
-    const reportDate = new Date().toLocaleDateString();
-    const content = `
-      RAPPORT SANITAIRE VISIPILOT
-      Date: ${reportDate}
-      
-      STATISTIQUES GLOBALES
-      - Taux de conformité: ${complianceRate}%
-      - Total Relevés: ${totalActions}
-      
-      DETAILS PAR MODULE
-      1. TEMPERATURES DE STOCKAGE
-         - Total: ${tempLogs.length}
-         - Alertes: ${tempLogs.filter(l => l.status !== 'ok').length}
-      
-      2. REFROIDISSEMENT RAPIDE
-         - Total Cycles: ${coolingLogs.length}
-         - Échecs: ${coolingLogs.filter(l => l.status !== 'ok').length}
-         
-      3. RECEPTION MARCHANDISES
-         - Total: ${deliveryLogs.length}
-         - Refus: ${deliveryLogs.filter(l => l.status === 'refused').length}
-         
-      4. NETTOYAGE
-         - Réalisé: ${cleaningTasks.filter(t => t.isDone).length} / ${cleaningTasks.length}
-    `;
+    // We retrieve the settings from localStorage directly here to avoid prop drilling complex state for now,
+    // or rely on the fact that App calls the generator.
+    // However, since Dashboard triggers the action, let's grab the persisted data for company name.
+    const savedData = localStorage.getItem('visipilot_haccp_data_v1');
+    let companyName = "Mon Entreprise";
+    let managerName = "Responsable";
     
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Rapport_HACCP_${reportDate.replace(/\//g, '-')}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    if (savedData) {
+        const parsed = JSON.parse(savedData);
+        if (parsed.companyName) companyName = parsed.companyName;
+        if (parsed.managerName) managerName = parsed.managerName;
+    }
+
+    generateDailyReport({
+      tempLogs,
+      deliveryLogs,
+      cleaningTasks,
+      coolingLogs,
+      labelHistory,
+      companyName,
+      managerName
+    });
   };
 
   return (
@@ -85,8 +74,8 @@ const Dashboard: React.FC<DashboardProps> = ({ tempLogs, deliveryLogs, cleaningT
             <FileText className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-bold text-indigo-900">Contrôle Sanitaire</h3>
-            <p className="text-sm text-indigo-600">Générer le rapport pour l'inspection DDPP</p>
+            <h3 className="font-bold text-indigo-900">Rapport Journalier</h3>
+            <p className="text-sm text-indigo-600">Générer le PDF officiel de la journée (Traçabilité & Contrôles)</p>
           </div>
         </div>
         <button 
@@ -94,7 +83,7 @@ const Dashboard: React.FC<DashboardProps> = ({ tempLogs, deliveryLogs, cleaningT
           className="w-full md:w-auto bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 shadow-md flex items-center justify-center font-bold transition-transform active:scale-95"
         >
           <Download className="w-5 h-5 mr-2" />
-          Exporter le Dossier
+          Télécharger le PDF
         </button>
       </div>
 
@@ -137,7 +126,8 @@ const Dashboard: React.FC<DashboardProps> = ({ tempLogs, deliveryLogs, cleaningT
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* CHARTS SECTION - HIDDEN ON MOBILE (Simplified View), VISIBLE ON TABLET/DESKTOP */}
+      <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Temperature Trend Chart */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="text-lg font-bold text-gray-800 mb-4">Dernières Températures</h3>
@@ -177,6 +167,11 @@ const Dashboard: React.FC<DashboardProps> = ({ tempLogs, deliveryLogs, cleaningT
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
+      
+      {/* Mobile-Only Message */}
+      <div className="block md:hidden text-center text-sm text-gray-500 mt-4 italic">
+         Affichage simplifié pour mobile. Utilisez les onglets ci-dessous pour la saisie.
       </div>
     </div>
   );

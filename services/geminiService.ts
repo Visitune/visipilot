@@ -1,12 +1,15 @@
-import { GoogleGenerativeAI, ChatSession } from "@google/genai";
+import { GoogleGenAI, Chat } from "@google/genai";
 
-const ai = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-
-export const createHACCPChat = (): ChatSession => {
+export const createHACCPChat = (apiKey: string): Chat => {
+  if (!apiKey) {
+    throw new Error("Clé API manquante");
+  }
+  const ai = new GoogleGenAI({ apiKey });
+  
   return ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
-      systemInstruction: `Tu es Visipilot, un assistant expert en hygiène et sécurité alimentaire (HACCP) pour les professionnels de la restauration.
+      systemInstruction: `Tu es VISI-JN, un assistant expert en hygiène et sécurité alimentaire (HACCP) pour les professionnels de la restauration.
       Ton objectif est d'aider les chefs et le personnel de cuisine à maintenir des normes irréprochables.
       
       Tes missions :
@@ -21,10 +24,10 @@ export const createHACCPChat = (): ChatSession => {
   });
 };
 
-export const sendMessageToGemini = async (chat: ChatSession, message: string) => {
+export const sendMessageToGemini = async (chat: Chat, message: string) => {
   try {
-    const response = await chat.sendMessageStream(message);
-    return response.stream;
+    const response = await chat.sendMessageStream({ message });
+    return response;
   } catch (error) {
     console.error("Error communicating with Gemini:", error);
     throw error;

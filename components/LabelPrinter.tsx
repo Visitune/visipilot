@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Printer, Camera, CheckCircle } from './Icons';
 import { LabelLog } from '../types';
+import { fileToBase64 } from '../utils/helpers';
 
 interface LabelPrinterProps {
   onAddLabel?: (label: LabelLog) => void;
@@ -13,7 +14,8 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ onAddLabel, history = [] })
   const [shelfLifeDays, setShelfLifeDays] = useState(3);
   const [prepDate] = useState(new Date());
   const [expiryDate, setExpiryDate] = useState(new Date());
-  const [hasPhoto, setHasPhoto] = useState(false);
+  const [photoData, setPhotoData] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const exp = new Date(prepDate);
@@ -36,17 +38,27 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ onAddLabel, history = [] })
         expiryDate,
         user: 'Chef Michel'
       };
+      // Note: In a real app we would store the photoData associated with the label log
+      // For this demo, we just clear it
       onAddLabel(newLabel);
       
       // Reset form slightly but keep shelf life
       setProductName('');
       setBatchNumber('');
-      setHasPhoto(false);
+      setPhotoData(null);
     }
   };
 
-  const handleTakePhoto = () => {
-    setHasPhoto(true);
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const base64 = await fileToBase64(file);
+        setPhotoData(base64);
+      } catch (err) {
+        console.error(err);
+      }
+    }
   };
 
   return (
@@ -67,15 +79,25 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ onAddLabel, history = [] })
                 <p className="text-xs text-blue-600">Photo étiquette fournisseur</p>
               </div>
             </div>
+            
+            <input 
+              type="file" 
+              accept="image/*" 
+              capture="environment"
+              ref={fileInputRef} 
+              className="hidden" 
+              onChange={handleFileChange}
+            />
+            
             <button 
-              onClick={handleTakePhoto}
+              onClick={() => fileInputRef.current?.click()}
               className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
-                hasPhoto 
+                photoData 
                   ? 'bg-green-500 text-white' 
                   : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-50'
               }`}
             >
-              {hasPhoto ? 'Photo OK' : 'Prendre Photo'}
+              {photoData ? 'Photo OK' : 'Prendre Photo'}
             </button>
           </div>
 
@@ -86,7 +108,8 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ onAddLabel, history = [] })
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
               placeholder="ex: Sauce Tomate Maison"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              style={{ colorScheme: 'light' }}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-gray-900 shadow-sm placeholder-gray-400"
             />
           </div>
 
@@ -97,7 +120,8 @@ const LabelPrinter: React.FC<LabelPrinterProps> = ({ onAddLabel, history = [] })
               value={batchNumber}
               onChange={(e) => setBatchNumber(e.target.value)}
               placeholder="ex: LOT-2023-10-24"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono"
+              style={{ colorScheme: 'light' }}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono bg-white text-gray-900 shadow-sm placeholder-gray-400"
             />
           </div>
           

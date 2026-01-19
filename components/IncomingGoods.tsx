@@ -1,114 +1,188 @@
 import React, { useState, useRef } from 'react';
 import { DeliveryLog } from '../types';
-import { Truck, Plus, CheckCircle, AlertTriangle, Camera } from './Icons';
+import { Truck, Plus, CheckCircle, AlertTriangle, Camera, Edit } from './Icons';
+import { fileToBase64 } from '../utils/helpers';
 
 interface IncomingGoodsProps {
   logs: DeliveryLog[];
   onAddLog: (log: DeliveryLog) => void;
+  onEditLog: (log: DeliveryLog) => void;
 }
 
-const IncomingGoods: React.FC<IncomingGoodsProps> = ({ logs, onAddLog }) => {
+const IncomingGoods: React.FC<IncomingGoodsProps> = ({ logs, onAddLog, onEditLog }) => {
   const [showForm, setShowForm] = useState(false);
-  const [newLog, setNewLog] = useState<Partial<DeliveryLog>>({
-    supplier: '',
-    product: '',
-    temperature: 0,
-    batchNumber: '',
-    photoUrl: ''
-  });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  
+  const [supplier, setSupplier] = useState('');
+  const [product, setProduct] = useState('');
+  const [temp, setTemp] = useState(2.0); // Slider value
+  const [batchNumber, setBatchNumber] = useState('');
+  const [photoUrl, setPhotoUrl] = useState('');
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isEditable = (date: Date) => {
+      const today = new Date();
+      return date.getDate() === today.getDate() &&
+             date.getMonth() === today.getMonth() &&
+             date.getFullYear() === today.getFullYear();
+  };
+
+  const resetForm = () => {
+    setSupplier('');
+    setProduct('');
+    setTemp(2.0);
+    setBatchNumber('');
+    setPhotoUrl('');
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  const handleEditClick = (log: DeliveryLog) => {
+      setEditingId(log.id);
+      setSupplier(log.supplier);
+      setProduct(log.product);
+      setTemp(log.temperature);
+      setBatchNumber(log.batchNumber);
+      setPhotoUrl(log.photoUrl || '');
+      setShowForm(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newLog.supplier && newLog.product) {
-      const logToAdd: DeliveryLog = {
-        id: Date.now().toString(),
-        supplier: newLog.supplier!,
-        product: newLog.product!,
-        temperature: Number(newLog.temperature),
-        batchNumber: newLog.batchNumber || 'N/A',
-        photoUrl: newLog.photoUrl,
-        status: Number(newLog.temperature) > 4 ? 'refused' : 'ok',
-        timestamp: new Date()
-      };
+    if (supplier && product) {
       
-      onAddLog(logToAdd);
-      setShowForm(false);
-      setNewLog({ supplier: '', product: '', temperature: 0, batchNumber: '', photoUrl: '' });
+      const status = temp > 4 ? 'refused' : 'ok';
+      
+      if (editingId) {
+          const originalLog = logs.find(l => l.id === editingId);
+          if (originalLog) {
+              const updatedLog: DeliveryLog = {
+                  ...originalLog,
+                  supplier,
+                  product,
+                  temperature: temp,
+                  batchNumber: batchNumber || 'N/A',
+                  photoUrl,
+                  status
+              };
+              onEditLog(updatedLog);
+          }
+      } else {
+        const logToAdd: DeliveryLog = {
+            id: Date.now().toString(),
+            supplier,
+            product,
+            temperature: temp,
+            batchNumber: batchNumber || 'N/A',
+            photoUrl,
+            status,
+            timestamp: new Date()
+        };
+        onAddLog(logToAdd);
+      }
+      resetForm();
     }
   };
 
-  const handleTakePhotoClick = () => {
-    fileInputRef.current?.click();
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const base64 = await fileToBase64(file);
+        setPhotoUrl(base64);
+      } catch (err) {
+        console.error("Error converting file", err);
+        alert("Impossible de traiter l'image");
+      }
+    }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const photoUrl = URL.createObjectURL(file);
-      setNewLog(prev => ({ ...prev, photoUrl }));
-    }
+  const getTempColor = (t: number) => {
+      if(t <= 4) return 'text-green-600';
+      return 'text-red-600';
   };
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center">
           <Truck className="w-8 h-8 mr-3 text-blue-600" />
           Réception Marchandises
         </h2>
-        <button 
-          onClick={() => setShowForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl flex items-center shadow-lg active:scale-95 transition-transform"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Nouvelle Livraison
-        </button>
+        {!showForm && (
+            <button 
+            onClick={() => { resetForm(); setShowForm(true); }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl flex items-center shadow-lg active:scale-95 transition-transform font-bold"
+            >
+            <Plus className="w-5 h-5 mr-2" />
+            Nouvelle Livraison
+            </button>
+        )}
       </div>
 
       {showForm && (
-        <div className="bg-white p-6 rounded-xl shadow-xl border border-blue-100 animate-in fade-in slide-in-from-top-4">
-          <h3 className="text-lg font-bold mb-4 text-gray-800">Contrôle à réception</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white p-6 rounded-xl shadow-xl border-2 border-blue-500 animate-in fade-in slide-in-from-top-4">
+          <h3 className="text-xl font-bold mb-6 text-gray-900">
+              {editingId ? 'Modifier la réception' : 'Contrôle à réception'}
+          </h3>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fournisseur</label>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Fournisseur</label>
                 <input 
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  value={newLog.supplier}
-                  onChange={e => setNewLog({...newLog, supplier: e.target.value})}
+                  className="w-full p-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 shadow-sm placeholder-gray-400"
+                  style={{ colorScheme: 'light' }}
+                  value={supplier}
+                  onChange={e => setSupplier(e.target.value)}
                   required
                   placeholder="Ex: Pomona"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Produit</label>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Produit</label>
                 <input 
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  value={newLog.product}
-                  onChange={e => setNewLog({...newLog, product: e.target.value})}
+                  className="w-full p-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-gray-900 shadow-sm placeholder-gray-400"
+                  style={{ colorScheme: 'light' }}
+                  value={product}
+                  onChange={e => setProduct(e.target.value)}
                   required
                   placeholder="Ex: Bœuf haché"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Température à cœur (°C)</label>
+
+               {/* Temp Slider */}
+              <div className="md:col-span-2 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                <label className="block text-sm font-bold text-gray-700 mb-4 flex justify-between">
+                    <span>Température à cœur</span>
+                    <span className={`text-2xl font-black ${getTempColor(temp)}`}>{temp}°C</span>
+                </label>
                 <input 
-                  type="number"
-                  step="0.1"
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-lg"
-                  value={newLog.temperature}
-                  onChange={e => setNewLog({...newLog, temperature: Number(e.target.value)})}
-                  required
+                    type="range"
+                    min="-18"
+                    max="15"
+                    step="0.5"
+                    value={temp}
+                    onChange={(e) => setTemp(parseFloat(e.target.value))}
+                    className="w-full h-4 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-blue-600"
                 />
+                <div className="flex justify-between text-xs text-gray-500 mt-2 font-mono">
+                    <span>-18°C (Surgelé)</span>
+                    <span>0°C</span>
+                    <span>+4°C (Limite)</span>
+                    <span>+15°C</span>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Numéro de Lot</label>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-gray-700 mb-1">Numéro de Lot</label>
                 <input 
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  value={newLog.batchNumber}
-                  onChange={e => setNewLog({...newLog, batchNumber: e.target.value})}
-                  placeholder="Requis"
+                  className="w-full p-4 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-mono text-gray-900 shadow-sm placeholder-gray-400"
+                  style={{ colorScheme: 'light' }}
+                  value={batchNumber}
+                  onChange={e => setBatchNumber(e.target.value)}
+                  placeholder="Numéro sur l'étiquette..."
                   required
                 />
               </div>
@@ -119,42 +193,39 @@ const IncomingGoods: React.FC<IncomingGoodsProps> = ({ logs, onAddLog }) => {
               <input 
                 type="file" 
                 accept="image/*" 
-                capture="environment" 
+                capture="environment"
+                ref={fileInputRef} 
                 className="hidden" 
-                ref={fileInputRef}
                 onChange={handleFileChange}
               />
               <button 
                 type="button"
-                onClick={handleTakePhotoClick}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
-                  newLog.photoUrl 
-                    ? 'bg-green-50 border-green-200 text-green-700' 
-                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                onClick={() => fileInputRef.current?.click()}
+                className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-xl border-2 transition-colors font-bold ${
+                  photoUrl 
+                    ? 'bg-green-100 border-green-500 text-green-800' 
+                    : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <Camera className="w-5 h-5" />
-                <span className="font-medium">{newLog.photoUrl ? 'Photo BL/Camion Ajoutée' : 'Ajouter Photo BL/Camion'}</span>
-                {newLog.photoUrl && <CheckCircle className="w-4 h-4 ml-2" />}
+                <Camera className="w-6 h-6" />
+                <span>{photoUrl ? 'Photo BL/Camion OK' : 'Prendre Photo BL/Camion'}</span>
+                {photoUrl && <CheckCircle className="w-5 h-5 ml-2" />}
               </button>
-              {newLog.photoUrl && (
-                <img src={newLog.photoUrl} alt="Aperçu" className="w-16 h-16 rounded-lg object-cover" />
-              )}
             </div>
             
             <div className="flex gap-3 pt-4 border-t border-gray-100 mt-4">
               <button 
                 type="button" 
-                onClick={() => setShowForm(false)}
-                className="flex-1 py-3 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium"
+                onClick={resetForm}
+                className="flex-1 py-4 text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-xl font-bold"
               >
                 Annuler
               </button>
               <button 
                 type="submit" 
-                className="flex-1 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold shadow-md"
+                className="flex-1 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold shadow-lg text-lg"
               >
-                Valider
+                {editingId ? 'Mettre à jour' : 'Valider'}
               </button>
             </div>
           </form>
@@ -165,39 +236,66 @@ const IncomingGoods: React.FC<IncomingGoodsProps> = ({ logs, onAddLog }) => {
         {logs.map(log => (
           <div key={log.id} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
             <div className="flex items-start space-x-4">
-              {log.photoUrl && (
-                <img src={log.photoUrl} alt="Preuve" className="w-16 h-16 rounded-lg object-cover" />
+              {log.photoUrl ? (
+                <div 
+                  className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shrink-0 cursor-pointer"
+                  onClick={() => {
+                    const w = window.open("");
+                    w?.document.write(`<img src="${log.photoUrl}" style="max-width:100%"/>`);
+                  }}
+                >
+                  <img src={log.photoUrl} alt="Preuve" className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center text-gray-300 border border-gray-200 shrink-0">
+                  <Camera className="w-6 h-6" />
+                </div>
               )}
+              
               <div>
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 mb-1">
                   <span className="font-bold text-gray-900 text-lg">{log.supplier}</span>
-                  <span className="text-gray-400 text-sm">•</span>
-                  <span className="text-gray-600 font-medium">{log.product}</span>
+                  <span className="hidden md:inline text-gray-400 text-sm">•</span>
+                  <span className="text-gray-700 font-medium">{log.product}</span>
                 </div>
                 <div className="text-sm text-gray-500">
-                  Lot: <span className="font-mono bg-gray-100 px-1 rounded">{log.batchNumber}</span> • {log.timestamp.toLocaleDateString()} {log.timestamp.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+                  <span className="font-mono bg-gray-100 px-1 rounded border border-gray-200 text-xs text-gray-600">Lot: {log.batchNumber}</span>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {log.timestamp.toLocaleDateString()} {log.timestamp.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+                  </div>
                 </div>
               </div>
             </div>
             
             <div className="flex flex-col items-end">
-               <div className={`text-2xl font-bold font-mono ${log.status === 'ok' ? 'text-green-600' : 'text-red-600'}`}>
+               <div className={`text-2xl font-black font-mono ${log.status === 'ok' ? 'text-green-600' : 'text-red-600'}`}>
                  {log.temperature}°C
                </div>
                {log.status === 'ok' ? (
-                 <span className="flex items-center text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full mt-1">
+                 <span className="flex items-center text-xs font-bold text-white bg-green-600 px-3 py-1 rounded-full mt-1 shadow-sm">
                    <CheckCircle className="w-3 h-3 mr-1" /> ACCEPTE
                  </span>
                ) : (
-                 <span className="flex items-center text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full mt-1">
+                 <span className="flex items-center text-xs font-bold text-white bg-red-600 px-3 py-1 rounded-full mt-1 shadow-sm">
                    <AlertTriangle className="w-3 h-3 mr-1" /> REFUSE
                  </span>
                )}
+               <div className="mt-2">
+                 {isEditable(log.timestamp) && (
+                    <button 
+                        onClick={() => handleEditClick(log)}
+                        className="bg-blue-100 text-blue-700 hover:bg-blue-200 p-2 rounded-lg transition-colors"
+                        title="Modifier"
+                    >
+                        <Edit className="w-5 h-5" />
+                    </button>
+                 )}
+               </div>
             </div>
           </div>
         ))}
         {logs.length === 0 && (
-          <div className="text-center p-8 text-gray-400 italic">Aucune réception enregistrée.</div>
+          <div className="text-center p-8 text-gray-500 italic">Aucune réception enregistrée.</div>
         )}
       </div>
     </div>

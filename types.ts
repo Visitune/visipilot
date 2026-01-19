@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -39,11 +40,11 @@ export interface CleaningTask {
   id: string;
   area: string;
   taskName: string;
-  frequency: 'Daily' | 'Weekly';
+  frequency: 'Quotidien' | 'Hebdo';
   isDone: boolean;
   doneAt?: Date;
   user?: string;
-  proofPhoto?: string;
+  proofPhoto?: string; // Base64 string
 }
 
 export interface DeliveryLog {
@@ -52,10 +53,35 @@ export interface DeliveryLog {
   product: string;
   temperature: number;
   batchNumber: string;
-  photoUrl?: string;
+  photoUrl?: string; // Base64 string
   status: 'ok' | 'refused';
   timestamp: Date;
   comment?: string;
+}
+
+export interface OilLog {
+  id: string;
+  fryerName: string;
+  tpmValue: number; // Taux Composés Polaires
+  oilChanged: boolean;
+  signature: string; // Nom de l'employé
+  date: Date;
+  status: 'ok' | 'warning' | 'critical';
+}
+
+export interface DocItem {
+  id: string;
+  category: 'Formation' | 'Analyses' | 'Nuisibles' | 'Autre';
+  title: string;
+  uploadDate: Date;
+  fileData?: string; // Base64 placeholder
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  pin?: string;
 }
 
 export enum TabView {
@@ -64,5 +90,36 @@ export enum TabView {
   COOLING = 'COOLING',
   LABELS = 'LABELS',
   CLEANING = 'CLEANING',
-  DELIVERIES = 'DELIVERIES'
+  DELIVERIES = 'DELIVERIES',
+  OILS = 'OILS',
+  DOCS = 'DOCS',
+  ASSISTANT = 'ASSISTANT',
+  GUIDE = 'GUIDE',
+  SETTINGS = 'SETTINGS'
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'model';
+  text: string;
+  timestamp: Date;
+}
+
+// Global App State Interface for Backup/Restore
+export interface AppData {
+  tempLogs: TempLog[];
+  deliveryLogs: DeliveryLog[];
+  cleaningTasks: CleaningTask[];
+  coolingLogs: CoolingLog[];
+  labelHistory: LabelLog[];
+  oilLogs?: OilLog[];
+  documents?: DocItem[];
+  teamMembers?: TeamMember[];
+  // Configuration
+  equipmentList?: string[];
+  cleaningSchedule?: CleaningTask[]; // Template for tasks
+  // Settings
+  apiKey?: string;
+  companyName?: string;
+  managerName?: string;
 }

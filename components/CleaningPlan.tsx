@@ -1,30 +1,37 @@
 import React, { useRef } from 'react';
 import { CleaningTask } from '../types';
 import { CheckCircle, ClipboardCheck, Camera } from './Icons';
+import { fileToBase64 } from '../utils/helpers';
 
 interface CleaningPlanProps {
   tasks: CleaningTask[];
-  onUpdateTask: (id: string, isDone: boolean, photoUrl?: string) => void;
+  onUpdateTask: (id: string, isDone: boolean, photo?: string) => void;
 }
 
 const CleaningPlan: React.FC<CleaningPlanProps> = ({ tasks, onUpdateTask }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const currentlySelectedTaskId = useRef<string | null>(null);
+  const currentTaskId = useRef<string | null>(null);
 
-  const progress = Math.round((tasks.filter(t => t.isDone).length / tasks.length) * 100);
+  const progress = tasks.length > 0 ? Math.round((tasks.filter(t => t.isDone).length / tasks.length) * 100) : 0;
 
-  const handleTakePhotoClick = (taskId: string) => {
-    currentlySelectedTaskId.current = taskId;
+  const handleCameraClick = (taskId: string) => {
+    currentTaskId.current = taskId;
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0] && currentlySelectedTaskId.current) {
-      const file = e.target.files[0];
-      const photoUrl = URL.createObjectURL(file);
-      onUpdateTask(currentlySelectedTaskId.current, true, photoUrl);
-      currentlySelectedTaskId.current = null;
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && currentTaskId.current) {
+      try {
+        const base64 = await fileToBase64(file);
+        onUpdateTask(currentTaskId.current, true, base64);
+      } catch (err) {
+        console.error("Error", err);
+      }
     }
+    // Reset
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    currentTaskId.current = null;
   };
 
   return (
@@ -32,11 +39,12 @@ const CleaningPlan: React.FC<CleaningPlanProps> = ({ tasks, onUpdateTask }) => {
       <input 
         type="file" 
         accept="image/*" 
-        capture="environment" 
+        capture="environment"
+        ref={fileInputRef} 
         className="hidden" 
-        ref={fileInputRef}
         onChange={handleFileChange}
       />
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center">
           <ClipboardCheck className="w-8 h-8 mr-3 text-blue-600" />
@@ -77,11 +85,11 @@ const CleaningPlan: React.FC<CleaningPlanProps> = ({ tasks, onUpdateTask }) => {
                 <div className="flex items-center space-x-2 text-sm text-gray-500">
                   <span className="bg-gray-100 px-2 py-0.5 rounded text-xs uppercase tracking-wide font-bold">{task.area}</span>
                   <span>•</span>
-                  <span>{task.frequency === 'Daily' ? 'Quotidien' : 'Hebdomadaire'}</span>
+                  <span>{task.frequency}</span>
                   {task.isDone && (
                     <>
                       <span>•</span>
-                      <span className="text-green-600">Fait par {task.user} à {task.doneAt?.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      <span className="text-green-600 font-medium">Fait par {task.user} à {task.doneAt?.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                     </>
                   )}
                 </div>
@@ -92,7 +100,7 @@ const CleaningPlan: React.FC<CleaningPlanProps> = ({ tasks, onUpdateTask }) => {
             <div className="flex items-center space-x-2 pl-4 border-l border-gray-100">
                {!task.isDone ? (
                  <button 
-                    onClick={(e) => { e.stopPropagation(); handleTakePhotoClick(task.id); }}
+                    onClick={(e) => { e.stopPropagation(); handleCameraClick(task.id); }}
                     className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     title="Valider avec Photo"
                  >
@@ -101,7 +109,16 @@ const CleaningPlan: React.FC<CleaningPlanProps> = ({ tasks, onUpdateTask }) => {
                ) : (
                  <div className="flex items-center space-x-2">
                    {task.proofPhoto && (
-                     <img src={task.proofPhoto} alt="Preuve" className="w-10 h-10 rounded-md object-cover" />
+                     <div 
+                        className="flex items-center text-blue-600 text-xs font-bold bg-blue-100 px-2 py-1 rounded cursor-pointer hover:bg-blue-200"
+                        onClick={() => {
+                          const w = window.open("");
+                          w?.document.write(`<img src="${task.proofPhoto}" style="max-width:100%"/>`);
+                        }}
+                      >
+                       <Camera className="w-3 h-3 mr-1" />
+                       Photo
+                     </div>
                    )}
                    <button
                     onClick={(e) => { e.stopPropagation(); onUpdateTask(task.id, false); }}
@@ -114,6 +131,9 @@ const CleaningPlan: React.FC<CleaningPlanProps> = ({ tasks, onUpdateTask }) => {
             </div>
           </div>
         ))}
+        {tasks.length === 0 && (
+          <div className="text-center p-8 text-gray-400">Aucune tâche de nettoyage configurée. Allez dans les paramètres.</div>
+        )}
       </div>
     </div>
   );
